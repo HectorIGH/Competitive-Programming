@@ -27,50 +27,65 @@
 //   Hide Hint #2  
 //Use bit masking to generate all the combinations.
 
-class CombinationIterator {
-    public:
+use std::collections::BTreeSet;
+
+struct CombinationIterator {
+    combinations: Vec<String>
+}
+
+
+/** 
+ * `&self` means the method takes an immutable reference.
+ * If you need a mutable reference, change it to `&mut self` instead.
+ */
+impl CombinationIterator {
+
+    fn new(characters: String, combinationLength: i32) -> Self {
+        let mut combi: BTreeSet<String> = BTreeSet::<String>::new();
+        let mut characters: Vec<char> = characters.chars().collect();
         
-        set<string> combinations;
-        
-        CombinationIterator(string characters, int combinationLength) {
-            int total = (1 << characters.size()) - 1;
-            for(int i = 0; i < total; i++) {
-                int c = total & i;
-                int position = 0;
-                int ones = 0;
-                string cc;
-                while(ones < combinationLength && c != 0) {
-                    if((1 & c) != 0) {
-                        cc.push_back(characters[position]);
-                        ones++;
-                    }
-                    c >>= 1;
-                    position++;
+        let mut total: u32 = (1 << characters.len()) - 1;
+        for i in 0..total {
+            let mut c: u32 = total & i;
+            let mut position: usize = 0;
+            let mut ones: i32 = 0;
+            let mut cc: String = String::new();
+            while ones < combinationLength && c != 0 {
+                if 1 & c != 0 {
+                    cc.push(characters[position]);
+                    ones += 1;
                 }
-                if(ones == combinationLength) {
-                    combinations.insert(cc);
-                }
+                c >>= 1;
+                position += 1;
+            }
+            if ones == combinationLength {
+                combi.insert(cc);
             }
         }
-        
-        string next() {
-            if(hasNext()) {
-                set<string>::iterator it = combinations.begin();
-                string s = *it;
-                combinations.erase(it);
-                return s;
-            }
-            return nullptr;
+        let mut combinations: Vec<String> = combi.iter().cloned().collect();
+        combinations.reverse();
+        CombinationIterator{
+            combinations: combinations
         }
-        
-        bool hasNext() {
-            return !combinations.empty();
-        }
-    };
+    }
     
-    /**
-     * Your CombinationIterator object will be instantiated and called as such:
-     * CombinationIterator* obj = new CombinationIterator(characters, combinationLength);
-     * string param_1 = obj->next();
-     * bool param_2 = obj->hasNext();
-     */
+    fn next(&mut self) -> String {
+        if CombinationIterator::has_next(&self) {
+            let s: String = self.combinations.pop().expect("");
+            s
+        } else {
+            String::new()
+        }
+    }
+    
+    fn has_next(&self) -> bool {
+        !self.combinations.is_empty()
+    }
+}
+
+/**
+ * Your CombinationIterator object will be instantiated and called as such:
+ * let obj = CombinationIterator::new(characters, combinationLength);
+ * let ret_1: String = obj.next();
+ * let ret_2: bool = obj.has_next();
+ */
